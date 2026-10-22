@@ -141,19 +141,14 @@ EOF
             exit 1
           fi
 
-          cp "$APK_SOURCE" "dist-release/rooznegar.apk"
           cp "$APK_SOURCE" "dist-release/rooznegar-${TAG}.apk"
-
-          cd dist-release
-          sha256sum "rooznegar.apk" > "rooznegar.apk.sha256"
-          sha256sum "rooznegar-${TAG}.apk" > "rooznegar-${TAG}.apk.sha256"
-          ls -la
+          ls -la dist-release/
 
       - name: Upload APK Artifact to GitHub Actions
         uses: actions/upload-artifact@v4
         with:
           name: rooznegar-${{ steps.vars.outputs.tag }}-apk
-          path: dist-release/*
+          path: dist-release/rooznegar-${{ steps.vars.outputs.tag }}.apk
           retention-days: 30
 
       - name: Create GitHub Release & Upload Assets
@@ -162,9 +157,7 @@ EOF
           tag_name: ${{ steps.vars.outputs.tag }}
           name: "روزنگار ${{ steps.vars.outputs.tag }}"
           files: |
-            dist-release/rooznegar.apk
             dist-release/rooznegar-${{ steps.vars.outputs.tag }}.apk
-            dist-release/rooznegar-${{ steps.vars.outputs.tag }}.apk.sha256
           draft: ${{ github.event.inputs.draft == true }}
           prerelease: ${{ github.event.inputs.prerelease == true }}
           generate_release_notes: true
@@ -173,8 +166,7 @@ EOF
 
             تقویم فارسی، آفلاین و سبک برای اندروید (نسخه ۸ به بالا).
 
-            ### دانلود مستقیم
-            - 📥 **[rooznegar.apk](https://github.com/${{ github.repository }}/releases/download/${{ steps.vars.outputs.tag }}/rooznegar.apk)**
+            ### دانلود
             - 📥 **[rooznegar-${{ steps.vars.outputs.tag }}.apk](https://github.com/${{ github.repository }}/releases/download/${{ steps.vars.outputs.tag }}/rooznegar-${{ steps.vars.outputs.tag }}.apk)**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
