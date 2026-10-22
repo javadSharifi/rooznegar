@@ -1,31 +1,104 @@
-# تقویم من
+<div align="center">
 
-Offline-first calendar (Jalali / Gregorian / Hijri), notes, birthdays and weekly tasks.
-All data lives on the device; sync through Cloudflare is optional.
+# روزنگار
 
-## Commands (Node 22: prefix with `fnm exec --using=22`)
+**تقویم فارسی، آفلاین و بدون دردسر**
 
-| What | Command |
-|---|---|
-| Web dev server | `pnpm dev` |
-| Tests | `pnpm test` |
-| Debug APK | `pnpm android:apk` |
-| Signed release APK -> `release/taghvim.apk` | `pnpm android:release` |
-| Local sync server (port 8799) | `pnpm exec wrangler dev --port 8799` |
-| Server smoke test | `node scripts/smoke-sync.mjs <url>` |
+شمسی، میلادی و قمری — کارها، یادداشت‌ها و تولدها، همه روی گوشی خودت.
 
-Back up `android/release.keystore` and `android/keystore.properties` somewhere safe: without them an installed app can never be updated.
+![Android](https://img.shields.io/badge/Android-8%2B-3DDC84?logo=android&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Offline-first](https://img.shields.io/badge/Offline--first-بدون_اینترنت-6C5CE7)
+![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white)
 
-## Deploying the sync server (once)
+<img src="docs/screenshots/today.jpg" width="300" alt="صفحه امروز روزنگار" />
+
+</div>
+
+---
+
+## چرا روزنگار؟
+
+- **سه تقویم کنار هم** — تاریخ شمسی، میلادی و قمری با هم دیده می‌شوند؛ اختلاف قمری هم قابل تنظیم است.
+- **همیشه آفلاین** — تمام داده‌ها در IndexedDB دستگاه می‌مانند. برنامه بدون اینترنت کامل کار می‌کند.
+- **کارهای تکرارشونده** — روزهای هفته، ساعت، یادآور و پیشرفت روزانه.
+- **یادداشت‌های روزانه** — برای هر روز بنویس، سنجاق کن و جست‌وجو کن.
+- **تولدها** — سن، تولد بعدی و یادآوری، با پشتیبانی از هر سه تقویم.
+- **جست‌وجوی سراسری** — میان یادداشت‌ها، کارها و تولدها.
+- **جعبه‌ابزار** — تبدیل تاریخ، فاصلهٔ دو تاریخ، محاسبهٔ سن و شمارش معکوس.
+- **حریم خصوصی** — قفل برنامه با پین یا اثر انگشت، بدون هیچ سرور اجباری.
+- **ویجت اندروید** — تاریخ و کارهای امروز روی صفحهٔ اصلی.
+- **همگام‌سازی اختیاری** — اگر خودت بخواهی، با Cloudflare Workers و D1.
+
+---
+
+## تصاویر برنامه
+
+| امروز | تقویم | جزئیات روز |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/today.jpg" width="240" /> | <img src="docs/screenshots/calendar.jpg" width="240" /> | <img src="docs/screenshots/day.jpg" width="240" /> |
+
+| کارها | تولدها | ابزارها |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/tasks.jpg" width="240" /> | <img src="docs/screenshots/birthdays.jpg" width="240" /> | <img src="docs/screenshots/tools.jpg" width="240" /> |
+
+<div align="center">
+<img src="docs/screenshots/settings.jpg" width="240" alt="تنظیمات" />
+</div>
+
+---
+
+## اجرا
+
+نیاز به **Node 22** دارد. اگر `fnm` داری، دستورها را با `fnm exec --using=22` اجرا کن.
+
+```bash
+pnpm install
+pnpm dev        # سرور توسعه
+pnpm test       # تست‌ها
+pnpm build      # خروجی production
+```
+
+## ساخت اندروید
+
+```bash
+pnpm android:apk      # APK دیباگ
+pnpm android:release  # APK امضاشده → release/taghvim.apk
+```
+
+> ⚠️ **مهم:** از `android/release.keystore` و `android/keystore.properties` نسخهٔ پشتیبان نگه دار. بدون آن‌ها نسخهٔ نصب‌شده روی گوشی هیچ‌وقت قابل به‌روزرسانی نیست.
+
+## همگام‌سازی (اختیاری)
+
+بدون `VITE_SYNC_URL` هیچ بخش همگام‌سازی وجود ندارد و برنامه به شبکه دست نمی‌زند.
 
 ```bash
 pnpm exec wrangler login
-pnpm exec wrangler d1 create taghvim          # copy the printed database_id into wrangler.jsonc
+pnpm exec wrangler d1 create taghvim          # database_id را در wrangler.jsonc بگذار
 pnpm exec wrangler d1 migrations apply taghvim --remote
-pnpm build && pnpm exec wrangler deploy        # prints https://taghvim.<you>.workers.dev
+pnpm build && pnpm exec wrangler deploy
 ```
 
-Then put that URL in `.env.production` as `VITE_SYNC_URL=https://taghvim.<you>.workers.dev` and rebuild the APK.
-Without `VITE_SYNC_URL` the app has no sync section and never touches the network.
+سپس آدرس Worker را در `.env.production` قرار بده و دوباره APK بساز:
 
-No invite codes: anyone with the app can create an account with email + password, and the server stores only a hash of the derived key. The sync entry stays hidden in Settings until the title is tapped five times.
+```env
+VITE_SYNC_URL=https://taghvim.<you>.workers.dev
+```
+
+ورود به بخش همگام‌سازی در تنظیمات مخفی است: پنج بار روی عنوان «تنظیمات» بزن. بدون کد دعوت، با ایمیل و رمز می‌توانی حساب بسازی؛ سرور فقط هش کلید مشتق‌شده را نگه می‌دارد.
+
+## تست سرور
+
+```bash
+pnpm exec wrangler dev --port 8799
+node scripts/smoke-sync.mjs http://127.0.0.1:8799
+```
+
+---
+
+<div align="center">
+
+ساخته‌شده برای فارسی‌زبان‌ها — با ❤️
+
+</div>
