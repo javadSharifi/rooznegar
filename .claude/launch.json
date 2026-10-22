@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "dev", "runtimeExecutable": "fnm", "runtimeArgs": ["exec", "--using=22", "pnpm", "dev", "--port", "5173", "--host"], "port": 5173 },
+    { "name": "preview", "runtimeExecutable": "fnm", "runtimeArgs": ["exec", "--using=22", "pnpm", "exec", "vite", "preview", "--port", "4173", "--strictPort"], "port": 4173 }
+  ]
+}
